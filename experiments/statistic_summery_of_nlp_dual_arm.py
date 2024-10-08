@@ -1,5 +1,4 @@
 from casadi import *
-
 from robotic import *
 from data import H5Reader, H5Writer
 from optimizer import DirectCollocationDA, quaternion2rm, calculate_rel_rm

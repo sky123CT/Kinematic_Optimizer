@@ -1,0 +1,13 @@
+casadi==3.6.7
+h5py==3.11.0
+joblib==1.4.2
+liecasadi==0.0.6
+matplotlib==3.8.4
+numpy==2.1.2
+pybullet==3.2.6
+PyKDL==1.4.0
+pytest==6.2.5
+scipy==1.14.1
+toppra==0.6.0
+urchin==0.0.27
+urdf_parser_py==0.0.4
