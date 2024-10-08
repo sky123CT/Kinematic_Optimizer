@@ -1,0 +1,3 @@
+[submodule "utility/urdf2casadi"]
+	path = utility/urdf2casadi
+	url = https://github.com/mahaarbo/urdf2casadi.git
