@@ -1,6 +1,10 @@
 from casadi import *
 from urdf2casadi import urdfparser as u2c
-franka = ddq_lims = [15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0]
+
+franka_q_ul = [2.8973, 1.7628, 2.8973, -0.0698, 2.8973, 3.7525, 2.8973]
+franka_q_ll = [-2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973]
+franka_dq_l = [2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100]
+franka_ddq_l = [15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0]
 
 class Robot:
     def __init__(self,
@@ -19,12 +23,13 @@ class Robot:
         self._end_link = end_link
         self._robot_parser = self.__define_robot_parser()
         _, self.velocity_limits = self.__get_dynamics_limits()
-        self.acc_limits = ddq_lims
+        self.acc_limits = franka_ddq_l
         self._joint_list, _, self.q_max, self.q_min = self.__get_robot_feature()
 
         # kinematics
         self._position_fk = self.__define_position_fk__()
         self._quaternion_fk = self.__define_quaternion_fk__()
+        self.pos_jac_mapping = None
 
     def get_joint_num(self):
         return self._robot_joint_num
@@ -40,6 +45,18 @@ class Robot:
         for i in range(self.get_joint_num()):
             random_joint_angles.append(np.random.uniform(self.q_min[i], self.q_max[i]))
         return random_joint_angles
+
+    def get_pos_jac(self, q_sym:MX):
+        pos_sym = self._position_fk(q_sym)[:3, 3]
+        return jacobian(pos_sym, q_sym)
+
+    def get_pos_jac_mapping(self, q_sym:MX):
+        jac = self.get_pos_jac(q_sym)
+        self.pos_jac_mapping = Function("Jacobian", [q_sym], [jac])
+
+    def get_ori_jac(self, q_sym:MX):
+        pos_sym = self._quaternion_fk(q_sym)
+        return jacobian(pos_sym, q_sym)
 
     def __define_robot_parser(self):
         robot_parser = u2c.URDFparser()
@@ -63,6 +80,9 @@ class Robot:
         fk_dict = self._robot_parser.get_forward_kinematics(self._root_link, self._end_link)
         fk = fk_dict[fk_option]
         return fk
+
+
+
 
 
 class MultiRobot:
